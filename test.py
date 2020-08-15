@@ -13,11 +13,17 @@ def count_sheep():
 
    
     
-from matplotlib import pyplot as plt
-plt.ion()
-i = 0
-while True:
-    plt.plot([0,i],[i,i])
-    input("???")
-    i+=1
-    (i)
+# from matplotlib import pyplot as plt
+# plt.ion()
+# i = 0
+# while True:
+#     plt.plot([0,i],[i,i])
+#     input("???")
+#     i+=1
+#     (i)
+
+
+
+
+
+

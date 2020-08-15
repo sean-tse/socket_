@@ -47,6 +47,10 @@ def receive_one(conn):
         return msg
     return None
 
+def next_turn():
+    i = num_msgs % 2
+    conn = conn_list[i]
+    send("YOUR TURN", conn)
 
 # Handles a single client
 def handle_client(conn, addr):
@@ -72,7 +76,8 @@ def handle_client(conn, addr):
             # handles content of message
             print(f"|Message Received| {msg} from {addr}")
             #send(f"{msg} received", conn)
-            send_all(msg+"  received")
+            send_all(msg)
+            next_turn()
 
     conn.close()
 
@@ -84,7 +89,7 @@ def start():
         (conn, addr) = server.accept() # awaits incoming new connection, and stores new connection socket and address
         conn_list.append(conn)
         thread = threading.Thread(target=handle_client, args=(conn, addr)).start() # creates a new thread to handle the client
-
+        send(f"P {len(conn_list)}", conn) # sends player number
         print(f"|Active connections|: {threading.active_count() -1}")
         print(conn_list)
 
@@ -105,14 +110,9 @@ def count_sheep():
         time.sleep(3)
     
 
-def next_turn():
-    i = num_msgs % 2
-    conn = conn_list[i]
-    send("YOUR TURN", conn)
-
 def game():
     # Sends a message to first player
-    send("FIRST MESSAGE AYY",conn_list[0])
+    send("YOUR TURN",conn_list[0])
 
 def main():
     try:

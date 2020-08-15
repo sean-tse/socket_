@@ -2,6 +2,10 @@ import socket
 import threading
 import time
 
+import ttt # the game that we want to play
+board = ttt.newboard()
+player_num = None
+
 HEADER = 64 # first message length
 PORT = 5050
 FORMAT = "utf-8"
@@ -41,16 +45,25 @@ def receive_one():
 # Asks for a single input and sends it
 def send_singular_input():
     global stop_threads
-    msg = input("\nInput: \n")
-    if msg == END_INPUT:
-        stop_threads = True
-        return 
-    if msg == DISCONNECT_MESSAGE or msg == SHUTDOWN:
-        stop_threads = True
-        send(msg)
-        exit(0)
-        return
+
+    while True:
+        msg = input("\nInput: \n")
+        if msg == END_INPUT:
+            stop_threads = True
+            return 
+        if msg == DISCONNECT_MESSAGE or msg == SHUTDOWN:
+            stop_threads = True
+            send(msg)
+            exit(0)
+            return
+        try:
+            valid = ttt.check_valid(msg, board)
+            if valid:
+                break
+        except:
+            pass
     
+    ttt.move(msg, player_num, board)        
     send(msg)
     time.sleep(0.1)
 
@@ -69,9 +82,27 @@ def receive_all():
             handle_msg(msg)
 
 def handle_msg(msg):
-    # handles content of message
+    # handles content of decoded message
     print(f"|Message Received| {msg} from SERVER")
-    send_singular_input()
+    ttt.print_board(board)
+    
+    if msg[0] == "P": # set up player numbers
+        global player_num 
+        player_num = int(msg.split()[1])
+    elif msg == "YOUR TURN":
+        send_singular_input()
+    else: # proccess opponents move
+        m = int(msg)
+        ttt.move(m, player_num%2 + 1, board)
+
+    p = ttt.check_gamestate(board)
+    if p != 0:
+        print(f"PLAYER {p} WINS")
+        ttt.print_board(board)
+        global stop_threads
+        stop_threads = True
+
+    
 
 
 def main():
